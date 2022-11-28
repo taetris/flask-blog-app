@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 import sqlite3
 from werkzeug.exceptions import abort
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '2Zu_L"^otwH*&lp*kHckaf]h|(ORpY&8@#JLzo<yab|6X6F=X%XgOWKp%6'
+app.config['SECRET_KEY'] = 'confidential-key-to-be-inserted'
 
 
 @app.route('/')
