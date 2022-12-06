@@ -1,0 +1,12 @@
+<html>
+
+    <body>
+        <h1>FORMS</h1>
+        <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <input type="submit" />
+            <a href="{{ url_for('post', post_id=post['id']) }}"></a>
+        </form>
+    </body>
+
+</html>
