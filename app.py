@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 import sqlite3
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'confidential-key-to-be-inserted'
 app.config['UPLOAD_FOLDER'] = 'static/files'
@@ -73,13 +75,21 @@ def delete(id):
     return redirect(url_for('index'))
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST', 'GET'])
 def upload():
     return render_template('upload.html')
 
-@app.route('/uploader', methods = ['GET', 'POST'])
-def upload_file():
-   if request.method == 'POST':
-      f = request.files['file']
-      f.save(secure_filename(f.filename))
-      return 'file uploaded successfully'
+@app.route('/display', methods = ['GET', 'POST'])
+def display_file():
+    if request.method == 'POST':
+        f = request.files['file']
+        filename = secure_filename(f.filename)
+
+        f.save(app.config['UPLOAD_FOLDER'] + filename)
+
+        file = open(app.config['UPLOAD_FOLDER'] + filename,"r")
+        content = file.read()   
+        
+    return render_template('content.html', content=content) 
+    
+    
