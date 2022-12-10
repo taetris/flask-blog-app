@@ -1,12 +1,15 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, url_for, flash, redirect, send_file, flash
 import sqlite3
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
+import requests
+import webbrowser
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'confidential-key-to-be-inserted'
-app.config['UPLOAD_FOLDER'] = 'static/files'
-
+app.config['UPLOAD_FOLDER'] = 'static/files/'
+app.config['DOWNLOAD_FOLDER'] = 'static/files/'
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -74,22 +77,55 @@ def delete(id):
     flash('"{}" was successfully deleted!'.format(post['title']))
     return redirect(url_for('index'))
 
-
-@app.route('/upload', methods=['POST', 'GET'])
-def upload():
-    return render_template('upload.html')
-
 @app.route('/display', methods = ['GET', 'POST'])
 def display_file():
     if request.method == 'POST':
         f = request.files['file']
         filename = secure_filename(f.filename)
 
-        f.save(app.config['UPLOAD_FOLDER'] + filename)
+        f.save(filelink)
 
         file = open(app.config['UPLOAD_FOLDER'] + filename,"r")
         content = file.read()   
         
     return render_template('content.html', content=content) 
     
+
+@app.route('/upload', methods=['POST', 'GET'])
+def upload():
+    return render_template('upload.html')
+
+def download(input_link):
+    content = "File added successfully!"
+    req = requests.get(input_link)
+    filename = req.url[input_link.rfind("/")+1:]
+    if (os.path.exists(app.config['UPLOAD_FOLDER']+filename)):
+        content = "File already exists. "
     
+    with open(app.config['UPLOAD_FOLDER'] +filename, 'wb') as f:
+        for chunk in req.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
+            return filename, content
+
+# https://filesamples.com/samples/document/txt/sample3.txt
+# https://filesamples.com/samples/document/pdf/sample3.pdf
+
+def openfile(filename):
+    path = app.config['UPLOAD_FOLDER'] + filename
+    webbrowser.open_new(path)
+    return
+
+@app.route('/uploadlink', methods = ['GET', 'POST'])
+def uploadlink():
+    if request.method == 'POST':    # submitted
+        input_link = request.form["userinput"]
+        print(input_link)
+        filename, content = download(input_link)
+        openfile(filename)
+        return render_template('alert.html', content=content)
+    else:
+        return render_template('uploadlink.html')
+
+
+
