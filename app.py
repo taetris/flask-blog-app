@@ -3,7 +3,6 @@ import sqlite3
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 import requests
-import webbrowser
 import os
 
 app = Flask(__name__)
@@ -112,9 +111,9 @@ def download(input_link):
 # https://filesamples.com/samples/document/pdf/sample3.pdf
 
 def openfile(filename):
-    path = app.config['UPLOAD_FOLDER'] + filename
-    webbrowser.open_new(path)
-    return
+    path = open(app.config['UPLOAD_FOLDER'] + filename,"r")
+    data = path.read()
+    return data
 
 @app.route('/uploadlink', methods = ['GET', 'POST'])
 def uploadlink():
@@ -122,8 +121,8 @@ def uploadlink():
         input_link = request.form["userinput"]
         print(input_link)
         filename, content = download(input_link)
-        openfile(filename)
-        return render_template('alert.html', content=content)
+        data = openfile(filename)
+        return render_template('alert.html', data=data, content=content)
     else:
         return render_template('uploadlink.html')
 
