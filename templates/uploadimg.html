@@ -1,0 +1,14 @@
+<form method="POST">
+    <div class="form-group">
+        <label for="exampleInputLink1">Enter your image url here</label>
+        <input type="link" class="form-control" name="userimg" id="exampleInputLink1" aria-describedby="LinkHelp"
+            placeholder="Enter image link">
+        <small id="linkHelp" class="form-text text-muted">And click Submit.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+{% if file_url %}
+<img src = "{{ file_url }}" style = 'width: 400px;'>
+{% endif %}
+<h2> {{ msg }}</h2>

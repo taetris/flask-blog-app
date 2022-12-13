@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'confidential-key-to-be-inserted'
 app.config['UPLOAD_FOLDER'] = 'static/files/'
 app.config['DOWNLOAD_FOLDER'] = 'static/files/'
+
+
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -76,7 +78,8 @@ def delete(id):
     flash('"{}" was successfully deleted!'.format(post['title']))
     return redirect(url_for('index'))
 
-@app.route('/display', methods = ['GET', 'POST'])
+
+@app.route('/display', methods=['GET', 'POST'])
 def display_file():
     if request.method == 'POST':
         f = request.files['file']
@@ -84,15 +87,16 @@ def display_file():
 
         f.save(filelink)
 
-        file = open(app.config['UPLOAD_FOLDER'] + filename,"r")
-        content = file.read()   
-        
-    return render_template('content.html', content=content) 
-    
+        file = open(app.config['UPLOAD_FOLDER'] + filename, "r")
+        content = file.read()
+
+    return render_template('content.html', content=content)
+
 
 @app.route('/upload', methods=['POST', 'GET'])
 def upload():
     return render_template('upload.html')
+
 
 def download(input_link):
     content = "File added successfully!"
@@ -100,22 +104,25 @@ def download(input_link):
     filename = req.url[input_link.rfind("/")+1:]
     if (os.path.exists(app.config['UPLOAD_FOLDER']+filename)):
         content = "File already exists. "
-    
-    with open(app.config['UPLOAD_FOLDER'] +filename, 'wb') as f:
-        for chunk in req.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
-            return filename, content
+
+    with open(app.config['UPLOAD_FOLDER'] + filename, 'wb') as f:
+        # for chunk in req.iter_content(chunk_size=8192):
+        #     if chunk:
+        #         f.write(chunk)
+        f.write(req.content)
+        return filename, content
 
 # https://filesamples.com/samples/document/txt/sample3.txt
 # https://filesamples.com/samples/document/pdf/sample3.pdf
 
+
 def openfile(filename):
-    path = open(app.config['UPLOAD_FOLDER'] + filename,"r")
+    path = open(app.config['UPLOAD_FOLDER'] + filename, "r")
     data = path.read()
     return data
 
-@app.route('/uploadlink', methods = ['GET', 'POST'])
+
+@app.route('/uploadlink', methods=['GET', 'POST'])
 def uploadlink():
     if request.method == 'POST':    # submitted
         input_link = request.form["userinput"]
@@ -126,5 +133,27 @@ def uploadlink():
     else:
         return render_template('uploadlink.html')
 
+# https://file-examples.com/wp-content/uploads/2017/10/file_example_JPG_100kB.jpg
 
 
+@app.route('/uploadimg', methods=['GET', 'POST'])
+def uploadimg():
+    path = None
+    msg = ""
+    if request.method == 'POST':    # submitted
+        input_link = request.form["userimg"]
+        if not (input_link == ""):
+            filename, content = download(input_link)
+            print("img downloaded")
+            msg = "file added successfully"
+            path = display_img(filename)
+            print("img downloaded")
+        else:
+            path = "static/files/undraw_Page_not_found_re_e9o6.png"
+            msg = "upload unsuccessful. Try again"
+    return render_template("uploadimg.html", file_url=path, msg=msg)
+
+
+def display_img(filename):
+    path = 'static/files/' + filename
+    return path
